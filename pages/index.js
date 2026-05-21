@@ -32,7 +32,7 @@ const FEATURE_ITEMS = [
 
 const PAGE_LABELS = {
   companion: '\u56fd\u9645\u4e2d\u6587\u5b66\u4e60\u8f85\u52a9\u5e94\u7528',
-  subtitle: '\u9762\u5411\u56fd\u9645\u4e2d\u6587\u5b66\u4e60\u8005\u7684\u591a\u573a\u666f\u4e2d\u6587\u8bc6\u522b\u3001\u81ea\u52a8\u8bed\u97f3\u8bc6\u522b\u4e0e\u5f15\u5bfc\u5f0f\u7ffb\u8bd1',
+  subtitle: '\u9762\u5411\u56fd\u9645\u4e2d\u6587\u5b66\u4e60\u8005\u7684\u591a\u573a\u666f\n\u4e2d\u6587\u8bc6\u522b\u4e0e\u5b9e\u65f6\u7ffb\u8bd1\u79fb\u52a8\u5e94\u7528',
   coreFeatures: '\u5e94\u7528\u6838\u5fc3\u529f\u80fd',
 };
 
@@ -78,7 +78,7 @@ export default function Home() {
       if (data.success) {
         setResult(data);
       } else {
-        alert(`Error: ${data.error}`);
+        alert(data.error || 'Processing failed. Please try again.');
       }
     } catch (error) {
       console.error(error);
@@ -136,7 +136,15 @@ export default function Home() {
               <h1 style={{ margin: '16px 0 10px', fontSize: '44px', lineHeight: '1.1', color: '#162033' }}>
                 Multiscene Chinese Recognition and Guided Translation for International Learners
               </h1>
-              <div style={{ marginBottom: '10px', fontSize: '14px', color: '#5f6f85', fontWeight: 700 }}>
+              <div
+                style={{
+                  marginBottom: '10px',
+                  fontSize: '14px',
+                  color: '#5f6f85',
+                  fontWeight: 700,
+                  whiteSpace: 'pre-line',
+                }}
+              >
                 {PAGE_LABELS.subtitle}
               </div>
 
@@ -201,7 +209,7 @@ export default function Home() {
             {[
               'Menus and prices',
               'Campus notices',
-              'Street signs',
+              'Instructions',
               'Packaged goods',
               'Spoken Chinese',
               'Saved study deck',
@@ -235,7 +243,7 @@ export default function Home() {
 
         <SpeechPanel onResult={setSpeechResult} />
 
-        <section style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <section style={{ display: 'grid', gap: '20px', marginTop: '4px' }}>
           <ImagePreview image={image} />
           <ResultPanel result={result} />
         </section>

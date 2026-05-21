@@ -1,0 +1,15 @@
+﻿category,sample_or_scene,recognized_text_blocks,ETRR,TAR,recognized_keywords,KRR,sample_count
+short_text_menu,menu1,41,0.9524,0.9286,,,1
+short_text_menu,menu2,15,1.0,0.9333,,,1
+short_text_menu,menu3,46,1.0,0.9565,,,1
+short_text_menu,menu4,29,0.9062,0.7812,,,1
+short_text_menu,menu5,50,0.9804,0.9804,,,1
+short_text_menu,menu6,45,1.0,0.9778,,,1
+short_text_menu,menu7,36,0.8611,0.7778,,,1
+short_text_menu,menu8,58,0.9667,0.5333,,,1
+short_text_menu,menu9,62,1.0,0.9839,,,1
+short_text_menu,menu10,45,0.9778,0.8889,,,1
+long_text_scene_average,Campus Notices,,,,11.2,0.9378,10
+long_text_scene_average,Instructions,,,,16.6,0.9621,10
+long_text_scene_average,Product Labels,,,,16.3,0.9888,10
+long_text_scene_average,Posters,,,,15.2,0.9394,10

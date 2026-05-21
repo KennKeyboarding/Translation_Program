@@ -98,7 +98,7 @@ ${JSON.stringify(normalizedTexts, null, 2)}
           Authorization: `Bearer ${process.env.KIMI_API_KEY}`,
           'Content-Type': 'application/json',
         },
-        timeout: 30000,
+        timeout: 45000,
       }
     );
 

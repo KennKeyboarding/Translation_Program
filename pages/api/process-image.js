@@ -24,10 +24,14 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('process-image API error:', error);
+    const rawMessage = error.message || 'Internal server error';
+    const userMessage = rawMessage.includes('Baidu OCR request timed out')
+      ? 'Baidu OCR processing took too long for this image. Please try once more, or use a clearer/cropped image.'
+      : rawMessage;
 
     return res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error',
+      error: userMessage,
     });
   }
 }

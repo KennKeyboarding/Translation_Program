@@ -13,20 +13,36 @@ function formatQuadrantLabel(quadrant) {
   return labels[quadrant] || quadrant;
 }
 
+function formatSceneLabel(sceneType) {
+  const labels = {
+    menu: 'Menu',
+    notice: 'Notice',
+    goods: 'Goods',
+    instruction: 'Instruction',
+    poster: 'Poster',
+    other: 'Other',
+  };
+
+  return labels[sceneType] || 'Other';
+}
+
 export default function ResultPanel({ result }) {
   if (!result?.annotated_image) return null;
 
+  const isDenseMode = result.render_mode === 'full_translation';
   const quadrantCounts = Object.entries(result.quadrant_counts || {}).filter(([, count]) => count > 0);
+  const sceneLabel = formatSceneLabel(result.scene_type);
 
   return (
-    <div style={{ flex: '2', minWidth: '400px' }}>
+    <div style={{ width: '100%' }}>
       <h3 style={{ marginBottom: '4px' }}>Guided Translation View</h3>
       <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, marginBottom: '8px' }}>
         {LABELS.subtitle}
       </div>
       <p style={{ marginTop: '-6px', marginBottom: '12px', color: '#475569', lineHeight: '1.5' }}>
-        OCR blocks are grouped by quadrant and linked to English translations with numbered guide lines,
-        which makes menus, signs, and notices easier to scan for Chinese learners.
+        {isDenseMode
+          ? 'Long-form notices, instructions, labels, and posters are shown with one overall translation area and keyword-based guide markers.'
+          : 'Short structured text such as menus is grouped by quadrant and linked to English translations with numbered guide lines.'}
       </p>
 
       <div
@@ -38,18 +54,30 @@ export default function ResultPanel({ result }) {
           backgroundColor: '#ffffff',
         }}
       >
-        {quadrantCounts.length > 0 && (
-          <div
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            padding: '14px 16px',
+            borderBottom: '1px solid #e2e8f0',
+            backgroundColor: '#f8fafc',
+          }}
+        >
+          <span
             style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-              padding: '14px 16px',
-              borderBottom: '1px solid #e2e8f0',
-              backgroundColor: '#f8fafc',
+              padding: '6px 10px',
+              borderRadius: '999px',
+              backgroundColor: '#dbeafe',
+              color: '#1d4ed8',
+              fontSize: '12px',
+              fontWeight: 700,
             }}
           >
-            {quadrantCounts.map(([quadrant, count]) => (
+            {sceneLabel}
+          </span>
+          {!isDenseMode &&
+            quadrantCounts.map(([quadrant, count]) => (
               <span
                 key={quadrant}
                 style={{
@@ -64,8 +92,7 @@ export default function ResultPanel({ result }) {
                 {formatQuadrantLabel(quadrant)}: {count}
               </span>
             ))}
-          </div>
-        )}
+        </div>
 
         <img
           src={`data:image/png;base64,${result.annotated_image}`}
@@ -74,6 +101,7 @@ export default function ResultPanel({ result }) {
             maxWidth: '100%',
             height: 'auto',
             display: 'block',
+            margin: '0 auto',
           }}
         />
       </div>

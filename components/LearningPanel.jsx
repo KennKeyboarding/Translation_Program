@@ -83,16 +83,31 @@ function buildFallbackEnglish(text) {
 }
 
 function getImageCards(result) {
-  if (!result?.text_blocks?.length) return [];
+  const sourceBlocks =
+    result?.render_mode === 'full_translation' && result?.keyword_display_items?.length
+      ? result.keyword_display_items.map((item, index) => ({
+          ...item,
+          text: item.term || item.text,
+          displayIndex: item.displayIndex || index + 1,
+          displayLabel: item.displayLabel || `Keyword ${index + 1}`,
+        }))
+      : result?.display_blocks?.length
+        ? result.display_blocks
+        : result?.text_blocks;
+  if (!sourceBlocks?.length) return [];
 
   const translatedLines = String(result.translated_text || '')
     ? getAlignedTranslationLines(
-        result.translation_lines?.length ? result.translation_lines : result.translated_text,
-        result.text_blocks.length
+        result?.render_mode === 'full_translation' && result?.keyword_display_items?.length
+          ? result.keyword_display_items.map((item) => item.translation || '')
+          : result.translation_lines?.length
+            ? result.translation_lines
+            : result.translated_text,
+        sourceBlocks.length
       )
     : [];
 
-  return result.text_blocks
+  return sourceBlocks
     .map((block, index) => {
       const chinese = String(block.text || '').trim();
       const english = String(translatedLines[index] || '').trim();
@@ -105,6 +120,7 @@ function getImageCards(result) {
         chinese,
         english: buildFallbackEnglish(english),
         quadrant: block.quadrant,
+        locationLabel: block.displayLabel || '',
         sourceType: 'image',
         sourceLabel: LABELS.sourceImage,
       });
@@ -140,7 +156,7 @@ function getSpeechCards(result) {
   if (!result?.original_text) return [];
 
   const chineseSegments = splitSpeechIntoSegments(result.original_text);
-  const translationSource = result.translation_lines?.length
+  const translationSource = result.translation_lines?.some((line) => String(line || '').trim())
     ? result.translation_lines
     : splitEnglishIntoSegments(result.translated_text);
   const englishSegments = getAlignedTranslationLines(translationSource, chineseSegments.length || 1);
@@ -150,7 +166,7 @@ function getSpeechCards(result) {
       id: buildCardId('speech', segment, englishSegments[index]),
       displayIndex: index + 1,
       chinese: segment,
-      english: buildFallbackEnglish(englishSegments[index] || result.translated_text),
+      english: buildFallbackEnglish(englishSegments[index]),
       quadrant: '',
       sourceType: 'speech',
       sourceLabel: LABELS.sourceSpeech,
@@ -165,6 +181,10 @@ function getStatusCount(cards, status) {
 function renderLocation(card) {
   if (card.sourceType === 'speech') {
     return LABELS.speechInput;
+  }
+
+  if (card.locationLabel) {
+    return card.locationLabel;
   }
 
   return formatQuadrant(card.quadrant);

@@ -5,6 +5,22 @@ function normalizeText(text) {
     .trim();
 }
 
+export function isSuspiciousMixedFragmentText(text) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return false;
+
+  if (!hasHan(trimmed) || !/[A-Za-z]/.test(trimmed)) return false;
+
+  return [
+    /^[\u3400-\u9fff]{1,4}[A-Z]{2,}[.]?$/u,
+    /^[A-Z]{2,}[\u3400-\u9fff]{1,4}[.]?$/u,
+    /^[\u3400-\u9fff]{1,4}[A-Z]{1,3}\d{1,3}[.]?$/u,
+    /^[\u3400-\u9fff]{1,4}\d{1,3}[A-Z]{1,3}[.]?$/u,
+  ].some((pattern) => pattern.test(trimmed));
+}
+
+const YEN_SYMBOL_PATTERN = '[￥¥]';
+
 function hasHan(text) {
   return /[\u3400-\u9fff]/u.test(text);
 }
@@ -49,6 +65,10 @@ export function isDecorationText(text) {
 export function isPriceText(text) {
   const trimmed = normalizeText(text);
   if (!trimmed) return false;
+
+  if (new RegExp(`^${YEN_SYMBOL_PATTERN}\\s*\\d+(?:\\.\\d{1,2})?(?:\\s*\\/\\s*[A-Za-z\\u4e00-\\u9fff]+)?$`, 'u').test(trimmed)) {
+    return true;
+  }
 
   return [
     /^(?:[$¥￥]|rmb|cny)\s*\d+(?:\.\d{1,2})?$/i,
@@ -125,4 +145,83 @@ export function isLowValueNoiseText(text) {
   }
 
   return false;
+}
+
+export function cleanMenuInlinePriceText(text) {
+  let cleaned = normalizeText(text);
+  if (!cleaned) return '';
+
+  cleaned = cleaned.replace(
+    /[（(]\s*(?:大|中|小|超大|特大|\d+\s*(?:只|个|份|碗|杯|盘|盒|袋|瓶|听|串)|[一二两三四五六七八九十百半]+\s*(?:只|个|份|碗|杯|盘|盒|袋|瓶|听|串))\s*[)）]/gu,
+    ' '
+  );
+
+  cleaned = cleaned.replace(
+    new RegExp(`\\s*${YEN_SYMBOL_PATTERN}\\s*\\d+(?:\\.\\d{1,2})?(?:\\s*\\/\\s*[A-Za-z\\u4e00-\\u9fff]+)?\\s*`, 'gu'),
+    ' '
+  );
+  cleaned = cleaned.replace(
+    /\s*\d+(?:\.\d{1,2})?\s*(?:元|块|RMB|rmb|CNY|cny)(?:\s*\/\s*[A-Za-z\u4e00-\u9fff]+)?\s*/g,
+    ' '
+  );
+  cleaned = cleaned.replace(/\s*\d+(?:\.\d{1,2})?\s*(?:元|块)\s*/g, ' ');
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+  const compact = cleaned.replace(/\s+/g, '');
+  const repeatedMatch = compact.match(/^([\u3400-\u9fff]{2,12})\1$/u);
+  if (repeatedMatch) {
+    cleaned = repeatedMatch[1];
+  }
+
+  cleaned = cleaned.replace(
+    /^([\u3400-\u9fff]{2,20})\s*(?:大|中|小|超大|特大)(?:碗|份|杯|盘|锅|扎|例|瓶|盒|袋|听)$/u,
+    '$1'
+  );
+
+  return cleaned.trim();
+}
+
+export function isMenuPortionOnlyText(text) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return false;
+
+  return /^(?:大|中|小|超大|特大)(?:碗|份|杯|盘|锅|扎|例|瓶|盒|袋|听)$/u.test(trimmed);
+}
+
+export function isLikelyMenuPriceNoise(text) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return false;
+
+  const compact = trimmed.replace(/\s+/g, '');
+  const digitRatio = getDigitRatio(compact);
+
+  if (compact.length <= 6 && digitRatio >= 0.25) {
+    if (/^[\u3400-\u9fff]{1,3}\d{1,3}(?:\.\d{1,2})?[\u3400-\u9fff]{1,3}$/u.test(compact)) {
+      return true;
+    }
+
+    if (/^(?:大|中|小|超大|特大)?[\u3400-\u9fff]{0,2}\d{1,3}(?:\.\d{1,2})?[\u3400-\u9fff]{0,2}$/u.test(compact)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function isQuantityUnitText(text) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return false;
+
+  return /^(?:\d+|[一二两三四五六七八九十百半]+)\s*(?:只|个|份|碗|杯|盘|盒|袋|瓶|听|串|斤|两|块|包|张|条)$/u.test(
+    trimmed
+  );
+}
+
+export function isMenuOptionTagText(text) {
+  const trimmed = normalizeText(text);
+  if (!trimmed) return false;
+
+  return /^[（(]\s*(?:大|中|小|超大|特大|\d+\s*(?:只|个|份|碗|杯|盘|盒|袋|瓶|听|串)|[一二两三四五六七八九十百半]+\s*(?:只|个|份|碗|杯|盘|盒|袋|瓶|听|串))\s*[)）]$/u.test(
+    trimmed
+  );
 }

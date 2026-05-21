@@ -5,10 +5,10 @@ import sharp from 'sharp';
 export async function preprocessImage(imageBuffer) {
   return await sharp(imageBuffer)
     .rotate()
-    .resize({ width: 1600, withoutEnlargement: true })
+    .resize({ width: 1280, withoutEnlargement: true })
     .normalize()
     .sharpen()
-    .jpeg({ quality: 85 })
+    .jpeg({ quality: 80 })
     .toBuffer();
 }
 

@@ -1,0 +1,4 @@
+﻿scenario_key,scenario_en,scenario_zh,sample_count,avg_recognized_keywords,avg_correct_keywords,avg_krr,avg_processing_time_s
+order,Ordering Dialogues,餐馆点单,10,13.7,13.1,0.9407,5.56
+msg,Voice Messages,电话留言,10,18.0,16.8,0.9296,5.61
+class,Classroom Notices,课堂通知,10,16.4,13.5,0.8509,5.26
